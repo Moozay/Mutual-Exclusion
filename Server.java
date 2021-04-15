@@ -23,6 +23,8 @@ public class Server {
             ClientHandler clientThread = new ClientHandler(client, clients);
             clients.add(clientThread);
 
+            System.out.println("hello");
+
             pool.execute(clientThread);
         }
     }
