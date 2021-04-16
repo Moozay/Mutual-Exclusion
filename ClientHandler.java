@@ -28,14 +28,14 @@ public class ClientHandler implements Runnable {
                 if(request.contains("sc")) {
                     if (isFree) {
                         enterSc();
-
                     }
                     else {
                         out.println("you have been added to the queue, please wait...");
                     }
                 }
                 else if ((request == null) || (request.equals("quit"))){
-                   leaving("[SERVER] client with id: " + this.clientId + " disconnected");
+                   leaving("client with id: " + this.clientId + " disconnected");
+                    clients.remove(client);
                    break;
                 }
                 else {
@@ -66,6 +66,12 @@ public class ClientHandler implements Runnable {
         if (clients == null) System.out.println("Hello");
         for (ClientHandler aClient : clients) {
             aClient.out.println((broadcastMessage));
+        }
+    }
+
+    private void multicast(int[] list, String msg){
+        for (int j : list) {
+            unicast(j, msg);
         }
     }
 
@@ -123,14 +129,28 @@ public class ClientHandler implements Runnable {
 
                 String message = in.readLine();
                 if(message.startsWith("bc")) {
-                    int firstSpace = message.indexOf(" ");
-                    if (firstSpace != -1) {
-                        outToAll(message.substring(firstSpace+1));
-                    }
+                    out.println("input message: ");
+                    String msg = in.readLine();
+                    outToAll(msg);
                 } else if (message.startsWith("mc")) {
-                    int firstSpace = message.indexOf(" ");
-                    if (firstSpace != -1) {
-                        outToAll(message.substring(firstSpace+1));
+                   showAllUsers();
+                    out.println("how many users do you want to message: ");
+                    String nbusers = in.readLine();
+                    out.println("out of sc");
+                    int intnbusers = Integer.parseInt(nbusers);
+                    int[] listOfUsers = new int[intnbusers];
+                    if((intnbusers>0) && (intnbusers<=clients.size())){
+                        out.println("Enter the indexes of users to message");
+                        for(int i = 0;i<listOfUsers.length;i++){
+                            String userIndex = in.readLine();
+                            listOfUsers[i] = Integer.parseInt(userIndex);
+                        }
+                        out.println("input message: ");
+                        String msg = in.readLine();
+                        multicast(listOfUsers, msg);
+                    }
+                    else {
+                        out.println("this is it");
                     }
                 }
                 else if (message.startsWith("uc")){
@@ -145,7 +165,6 @@ public class ClientHandler implements Runnable {
                 else if (message.startsWith("exit")){
                     leaving("client with id: " + this.clientId + " left the critical section");
                     flag();
-                    clients.remove(client);
                     break;
                 }
                 else {

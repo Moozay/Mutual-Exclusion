@@ -20,7 +20,7 @@ public class ServerConnection implements Runnable {
 
                 if(serverResponse == null) break;
 
-                System.out.println("Server says: " + serverResponse);
+                System.out.println("[SERVER]: " + serverResponse);
             }
         } catch (IOException e) {
             e.printStackTrace();
