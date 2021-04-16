@@ -24,6 +24,9 @@ public class ClientHandler implements Runnable {
     public void run() {
         try {
             while (true) {
+                out.println(" --- OPTIONS --- ");
+                out.println(" 1. 'sc' to enter critical section\n 2. 'quit' to disconnect");
+
                 String request = in.readLine();
                 if(request.contains("sc")) {
                     if (isFree) {
@@ -135,11 +138,10 @@ public class ClientHandler implements Runnable {
                 } else if (message.startsWith("mc")) {
                    showAllUsers();
                     out.println("how many users do you want to message: ");
-                    String nbusers = in.readLine();
-                    out.println("out of sc");
-                    int intnbusers = Integer.parseInt(nbusers);
-                    int[] listOfUsers = new int[intnbusers];
-                    if((intnbusers>0) && (intnbusers<=clients.size())){
+                    String nbUsers = in.readLine();
+                    int intNbUsers = Integer.parseInt(nbUsers);
+                    int[] listOfUsers = new int[intNbUsers];
+                    if((intNbUsers>0) && (intNbUsers<=clients.size())){
                         out.println("Enter the indexes of users to message");
                         for(int i = 0;i<listOfUsers.length;i++){
                             String userIndex = in.readLine();
