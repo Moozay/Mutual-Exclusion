@@ -152,7 +152,7 @@ public class ClientHandler implements Runnable {
                         multicast(listOfUsers, msg);
                     }
                     else {
-                        out.println("this is it");
+                        out.println("please input valid number");
                     }
                 }
                 else if (message.startsWith("uc")){
