@@ -18,7 +18,7 @@ public class Client {
         while (true) {
 
             System.out.println(" --- OPTIONS --- ");
-            System.out.println(" 1. 'id' to get an ID \n 2. 'quit' to disconnect");
+            System.out.println(" 1. 'sc' to enter critical section\n 2. 'quit' to disconnect");
             String command = keyboard.readLine();
 
             out.println(command);
