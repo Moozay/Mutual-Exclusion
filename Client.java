@@ -12,6 +12,7 @@ public class Client {
         ServerConnection serverConnection = new ServerConnection(socket);
 
         BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
         new Thread(serverConnection).start();
@@ -20,6 +21,13 @@ public class Client {
             String command = keyboard.readLine();
 
             out.println(command);
+
+            String serverMsg = in.readLine();
+
+            if (serverMsg.contains("enter")) {
+                out.println("ok");
+                System.out.println("Hello");
+            }
 
             if (command.equals("quit")) break;
 

@@ -29,6 +29,10 @@ public class ClientHandler implements Runnable {
 
                 String request = in.readLine();
                 if(request.contains("sc")) {
+                    outToAll("enter");
+                    if(request.contains("ok")) {
+                        out.println("hi");
+                    }
                     if (isFree) {
                         enterSc();
                     }
