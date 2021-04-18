@@ -21,7 +21,7 @@ public class Client {
 
             out.println(command);
 
-            if (command.equals("quit")) break;
+            if (command.equals("break")) break;
 
         }
 

@@ -66,7 +66,6 @@ public class ClientHandler implements Runnable {
     }
 
     private void outToAll(String broadcastMessage) {
-        if (clients == null) System.out.println("Hello");
         for (ClientHandler aClient : clients) {
             aClient.out.println((broadcastMessage));
         }
@@ -126,9 +125,9 @@ public class ClientHandler implements Runnable {
         try {
             while (true) {
                 out.println("1. 'bc' to broadcast\n" +
-                        " 2. 'mc' to send message to group\n " +
-                        "3. 'uc' to send message to a user\n" +
-                        "4. 'exit' to leave critical section");
+                            "2. 'mc' to send message to group\n " +
+                            "3. 'uc' to send message to a user\n" +
+                            "4. 'exit' to leave critical section");
 
                 String message = in.readLine();
                 if(message.startsWith("bc")) {
