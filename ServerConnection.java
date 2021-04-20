@@ -4,12 +4,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class ServerConnection implements Runnable {
-    private Socket server;
-    private BufferedReader in;
+    private final BufferedReader in;
 
     public ServerConnection(Socket s) throws IOException {
-        server = s;
-        in = new BufferedReader(new InputStreamReader(server.getInputStream()));
+        in = new BufferedReader(new InputStreamReader(s.getInputStream()));
     }
 
     @Override

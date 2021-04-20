@@ -2,30 +2,28 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ClientHandler implements Runnable {
-    private Socket client;
-    private BufferedReader in;
-    private PrintWriter out;
-    private ArrayList<ClientHandler> clients;
-    private SocketAddress clientId;
+    private final BufferedReader in;
+    private final PrintWriter out;
+    private final ArrayList<ClientHandler> clients;
+    private final SocketAddress clientId;
     private static boolean isFree = true;
-    private static ArrayList<SocketAddress> queue = new ArrayList<>();
 
     public ClientHandler(Socket clientSocket, ArrayList<ClientHandler> clients, SocketAddress clientId) throws IOException {
-        this.client = clientSocket;
         this.clients = clients;
         this.clientId = clientId;
-        InputStream in1;
-        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        out = new PrintWriter(client.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        out = new PrintWriter(clientSocket.getOutputStream(), true);
     }
 
     public void run() {
         try {
             while (true) {
                 out.println(" --- OPTIONS --- ");
-                out.println(" 1. 'sc' to enter critical section\n 2. 'quit' to disconnect");
+                out.println(" 1. 'sc' pour demander la section critique\n" +
+                            " 2. 'quit' pour se deconnecter du server");
 
                 String request = in.readLine();
                 if(request.contains("sc")) {
@@ -33,12 +31,11 @@ public class ClientHandler implements Runnable {
                         enterSc();
                     }
                     else {
-                        out.println("you have been added to the queue, please wait...");
+                        out.println("Client '" + clientId +"' a la section critique, veuillez patienter...");
                     }
                 }
-                else if ((request == null) || (request.equals("quit"))){
-                   leaving("client with id: " + this.clientId + " disconnected");
-                    clients.remove(client);
+                else if (request.equals("quit")){
+                   leaving("Client avec id: " + this.clientId + " s'est deconnecte", clientId);
                    break;
                 }
                 else {
@@ -46,8 +43,8 @@ public class ClientHandler implements Runnable {
                 }
             }
         } catch(IOException e) {
-            System.err.println("IO Exception  3  in client handler");
-            System.err.println(e.getStackTrace());
+            System.err.println("IO Exception in client handler");
+            System.err.println(Arrays.toString(e.getStackTrace()));
         } finally {
             out.close();
             try {
@@ -59,15 +56,15 @@ public class ClientHandler implements Runnable {
     }
 
     private void showAllUsers(){
-        out.println("list of current users online");
+        out.println("Liste des utilisateurs actuellement connectes");
         for (int i = 0; i< clients.size(); i++){
             out.println(i + ". "+ clients.get(i).clientId);
         }
     }
 
-    private void outToAll(String broadcastMessage) {
+    private void outToAll(String broadcastMessage, SocketAddress clientId) {
         for (ClientHandler aClient : clients) {
-            aClient.out.println((broadcastMessage));
+            aClient.out.println("Message de '" + clientId + "' : '" + broadcastMessage + "'");
         }
     }
 
@@ -79,19 +76,19 @@ public class ClientHandler implements Runnable {
 
     private void unicast(int indexNb, String msg){
         if ((indexNb<0) || (indexNb>clients.size())){
-            out.println("please choose a valid option");
+            out.println("Veuillez choisir une option valide");
         }
         else{
            for (int i = 0; i< clients.size(); i++){
                if(i == indexNb){
-                   clients.get(i).out.println("message from " + clientId + " : '" + msg + "'");
+                   clients.get(i).out.println("Message de '" + clientId + "' : '" + msg + "'");
                }
            }
         }
     }
 
-    private void leaving(String msg){
-        outToAll(msg);
+    private void leaving(String msg, SocketAddress clientId){
+        outToAll(msg, clientId);
         System.out.println(msg);
     }
 
@@ -99,82 +96,67 @@ public class ClientHandler implements Runnable {
         isFree = !isFree;
     }
 
-    private void addToQueue(SocketAddress clientId){
-        queue.add(clientId);
-    }
-
-    private void removeFromQueue(){
-        queue.remove(0);
-    }
-
     private void enterSc(){
         if (isFree){
             flag();
             executeSc();
         }
-        else {
-
-        }
-    }
-
-    private void removeFromList(SocketAddress id){
-
     }
 
     private void executeSc(){
         try {
             while (true) {
-                out.println("1. 'bc' to broadcast\n" +
-                            "2. 'mc' to send message to group\n " +
-                            "3. 'uc' to send message to a user\n" +
-                            "4. 'exit' to leave critical section");
+                out.println("1. 'bc' pour envoyer un 'broadcast'\n" +
+                            "2. 'mc' pour envoyer un 'multicast'\n " +
+                            "3. 'uc' pour envoyer un 'unicast'\n" +
+                            "4. 'exit' pour sortir de la section critique");
 
                 String message = in.readLine();
                 if(message.startsWith("bc")) {
-                    out.println("input message: ");
+                    out.println("Entrez un message: ");
                     String msg = in.readLine();
-                    outToAll(msg);
+                    outToAll(msg, clientId);
                 } else if (message.startsWith("mc")) {
                    showAllUsers();
-                    out.println("how many users do you want to message: ");
+                    out.println("Combien d'utilisateurs voulez-vous envoyer un message: ");
                     String nbUsers = in.readLine();
                     int intNbUsers = Integer.parseInt(nbUsers);
                     int[] listOfUsers = new int[intNbUsers];
                     if((intNbUsers>0) && (intNbUsers<=clients.size())){
-                        out.println("Enter the indexes of users to message");
+                        out.println("Entrez les index des utilisateurs à envoyer un message");
                         for(int i = 0;i<listOfUsers.length;i++){
                             String userIndex = in.readLine();
                             listOfUsers[i] = Integer.parseInt(userIndex);
                         }
-                        out.println("input message: ");
+                        out.println("Entrez un message: ");
                         String msg = in.readLine();
                         multicast(listOfUsers, msg);
                     }
                     else {
-                        out.println("please input valid number");
+                        out.println("Veuillez saisir un numero valide");
                     }
                 }
                 else if (message.startsWith("uc")){
-                    out.println("select a user: \n");
+                    out.println("Selectionnez un utilisateur: \n");
                     showAllUsers();
                     String user = in.readLine();
                     int userInt = Integer.parseInt(user);
-                    out.println("input message: ");
+                    out.println("Entrez un message: ");
                     String msg = in.readLine();
                     unicast(userInt,msg);
                 }
                 else if (message.startsWith("exit")){
-                    leaving("client with id: " + this.clientId + " left the critical section");
+                    leaving("Client avec id: " + this.clientId + " a sorti de la section critique", clientId);
                     flag();
                     break;
                 }
                 else {
-                    out.println("Choose a valid option");
+                    out.println("Choisissez une option valide");
                 }
             }
         } catch(IOException e) {
             System.err.println("IO Exception in client handler");
-            System.err.println(e.getStackTrace());
+            System.err.println(Arrays.toString(e.getStackTrace()));
         }
     }
 }

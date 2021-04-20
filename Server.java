@@ -10,12 +10,13 @@ public class Server {
     private static final int PORT = 9090;
 
 
-    private static ArrayList<ClientHandler> clients = new ArrayList<>();
-    private static ExecutorService pool = Executors.newFixedThreadPool(4);
+    private static final ArrayList<ClientHandler> clients = new ArrayList<>();
+    private static final ExecutorService pool = Executors.newFixedThreadPool(4);
 
     public static void main(String[] args) throws IOException {
         ServerSocket listener = new ServerSocket(PORT);
 
+        //noinspection InfiniteLoopStatement
         while (true) {
             System.out.println("[SERVER] Waiting for client...");
             Socket client = listener.accept();
